@@ -20,7 +20,6 @@ exports.postSignup = async (req, res, next) => {
 
   try {
     const user = await User.findOne({ email: email });
-    console.log(user);
     if (user) {
       return res
         .status(409)
@@ -40,7 +39,39 @@ exports.postSignup = async (req, res, next) => {
     return res
       .status(201)
       .json({ message: "User created", user: { name, email } });
-  } catch (error) {}
+  } catch (error) {
+    next500error(next, error);
+  }
 };
 
-exports.postLogin = (req, res, next) => {};
+exports.postLogin = async (req, res, next) => {
+  const { email, password } = req.body;
+
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).json({ error: errors.array()[0].msg });
+  }
+
+  try {
+    const user = await User.findOne({ email: email });
+    if (!user) {
+      return res.status(404).json({ error: "Email not registered." });
+    }
+
+    const passwordsMatch = await bcrypt.compare(password, user.password);
+    if (!passwordsMatch) {
+      return res.status(401).json({ error: "Invalid email and/or password" });
+    }
+
+    req.session.user = user;
+    req.session.isLoggedIn = true;
+    req.session.save((err) => console.log(err));
+    return res.status(200).json({
+      message: "Successfully logged in.",
+      session: { user: req.session.user },
+      isLoggedIn: req.session.isLoggedIn,
+    });
+  } catch (error) {
+    next500error(next, error);
+  }
+};
