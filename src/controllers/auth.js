@@ -75,3 +75,16 @@ exports.postLogin = async (req, res, next) => {
     next500error(next, error);
   }
 };
+
+exports.postLogout = (req, res, next) => {
+  if (req.session.user) {
+    const userEmail = req.session.user.email;
+    req.session.destroy();
+    return res
+      .status(200)
+      .json({ message: "Successfully Logged Out", user: userEmail });
+  }
+  return res
+    .status(401)
+    .json({ error: "Can't log out when you aren't logged in." });
+};
