@@ -3,6 +3,7 @@ const crypto = require("crypto");
 // Npm imports
 const bcrypt = require("bcryptjs");
 const { validationResult } = require("express-validator");
+const jwt = require("jsonwebtoken");
 
 // Model imports
 const User = require("../models/userModel.js");
@@ -35,10 +36,20 @@ exports.postSignup = async (req, res, next) => {
       balance: 0,
       movements: [],
     });
+
+    const token = jwt.sign(
+      { userId: newUser._id, email },
+      process.env.TOKEN_KEY,
+      {
+        expiresIn: "2h",
+      }
+    );
+    newUser.token = token;
+
     await newUser.save();
     return res
       .status(201)
-      .json({ message: "User created", user: { name, email } });
+      .json({ message: "User created", user: { name, email, token } });
   } catch (error) {
     next500error(next, error);
   }
@@ -63,13 +74,15 @@ exports.postLogin = async (req, res, next) => {
       return res.status(401).json({ error: "Invalid email and/or password" });
     }
 
-    req.session.user = user;
-    req.session.isLoggedIn = true;
-    req.session.save((err) => console.log(err));
+    const token = jwt.sign({ userId: user._id, email }, process.env.TOKEN_KEY, {
+      expiresIn: "2h",
+    });
+
+    user.token = token;
+
     return res.status(200).json({
       message: "Successfully logged in.",
-      session: { user: req.session.user },
-      isLoggedIn: req.session.isLoggedIn,
+      user,
     });
   } catch (error) {
     next500error(next, error);
