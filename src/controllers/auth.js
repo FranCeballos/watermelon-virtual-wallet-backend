@@ -82,7 +82,7 @@ exports.postLogin = async (req, res, next) => {
 
     return res.status(200).json({
       message: "Successfully logged in.",
-      user,
+      user: { _id: user._id, email: user.email, token },
     });
   } catch (error) {
     next500error(next, error);
