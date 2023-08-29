@@ -48,9 +48,9 @@ exports.postDeposit = async (req, res, next) => {
     }
 
     user.balance += parseFloat(amountToAdd);
-    user.movements.push({
+    user.movements.unshift({
       amount: amountToAdd,
-      description: "deposit",
+      description: "Deposit",
       sender: "You",
       date: Date.now(),
     });
