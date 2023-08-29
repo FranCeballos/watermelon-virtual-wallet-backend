@@ -30,7 +30,7 @@ const userSchema = new Schema({
           type: Number,
           required: true,
         },
-        movementType: {
+        sender: {
           type: String,
           required: true,
         },

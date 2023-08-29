@@ -61,3 +61,10 @@ exports.validateNewPassword = [
       return true;
     }),
 ];
+
+exports.validateDeposit = [
+  body("amount", "Amount must be a number.")
+    .isNumeric()
+    .isLength({ max: 5 })
+    .withMessage("Amount must be between 1 and 10.000"),
+];

@@ -47,9 +47,7 @@ exports.postSignup = async (req, res, next) => {
     newUser.token = token;
 
     await newUser.save();
-    return res
-      .status(201)
-      .json({ message: "User created", user: { name, email, token } });
+    return res.status(201).json({ message: "User created", user: { token } });
   } catch (error) {
     next500error(next, error);
   }
