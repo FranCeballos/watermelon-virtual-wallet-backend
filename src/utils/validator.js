@@ -68,3 +68,14 @@ exports.validateDeposit = [
     .isLength({ max: 5 })
     .withMessage("Amount must be between 1 and 10.000"),
 ];
+
+exports.validateSend = [
+  body("email")
+    .isEmail()
+    .withMessage("Please enter a valid email address.")
+    .normalizeEmail(),
+  body("amount", "Amount must be a number.")
+    .isNumeric()
+    .isLength({ max: 5 })
+    .withMessage("Amount must be between 1 and 10.000"),
+];
