@@ -2,35 +2,34 @@ const { body, check } = require("express-validator");
 const User = require("../models/userModel.js");
 
 exports.validateSignUp = [
-  body("name", "First Name must have a minimum of 3 characters")
+  body("name", "Must be at least 3 characters.")
     .isString()
     .isLength({ min: 3 })
     .trim(),
   check("email")
     .isEmail()
-    .withMessage("Please enter a valid email.")
+    .withMessage("Enter a valid email.")
     .custom((value, { req }) => {
       return User.findOne({ email: value }).then((userDoc) => {
         if (userDoc) {
           return Promise.reject(
-            "E-Mail exists already, please pick a different one."
+            "E-Mail registered, please pick a different one."
           );
         }
       });
     })
     .normalizeEmail(),
-  body(
-    "password",
-    "Please enter a password with only numbers and text and at least 5 characters."
-  )
+  body("password")
     .isLength({ min: 5 })
+    .withMessage("Must be at least 5 alphanumeric characters.")
     .isAlphanumeric()
+    .withMessage("Must be alphanumeric.")
     .trim(),
   body("passwordConfirm")
     .trim()
     .custom((value, { req }) => {
       if (value !== req.body.password) {
-        throw new Error("Passwords have to match.");
+        throw new Error("Passwords don't match.");
       }
       return true;
     }),
@@ -39,11 +38,13 @@ exports.validateSignUp = [
 exports.validateLogIn = [
   body("email")
     .isEmail()
-    .withMessage("Please enter a valid email address.")
+    .withMessage("Enter a valid email address.")
     .normalizeEmail(),
-  body("password", "Password has to be valid.")
+  body("password")
     .isLength({ min: 5 })
+    .withMessage("Must be at least 5 alphanumeric characters.")
     .isAlphanumeric()
+    .withMessage("Must be alphanumeric.")
     .trim(),
 ];
 
@@ -63,7 +64,7 @@ exports.validateNewPassword = [
 ];
 
 exports.validateDeposit = [
-  body("amount", "Amount must be a number.")
+  body("amount", "Enter amount")
     .isNumeric()
     .isLength({ max: 5 })
     .withMessage("Amount must be between 1 and 10.000"),
@@ -72,9 +73,9 @@ exports.validateDeposit = [
 exports.validateSend = [
   body("email")
     .isEmail()
-    .withMessage("Please enter a valid email address.")
+    .withMessage("Enter a valid email address.")
     .normalizeEmail(),
-  body("amount", "Amount must be a number.")
+  body("amount", "Enter an amount.")
     .isNumeric()
     .isLength({ max: 5 })
     .withMessage("Amount must be between 1 and 10.000"),

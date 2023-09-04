@@ -43,7 +43,9 @@ exports.postDeposit = async (req, res, next) => {
     const validationErrors = validationResult(req);
 
     if (!validationErrors.isEmpty()) {
-      return res.status(422).json({ error: validationErrors.array()[0].msg });
+      const errorObj = {};
+      validationErrors.array().forEach((i) => (errorObj[i.path] = i.msg));
+      return res.status(422).json(errorObj);
     }
 
     // Search user
@@ -93,19 +95,21 @@ exports.postSend = async (req, res, next) => {
     const validationErrors = validationResult(req);
 
     if (!validationErrors.isEmpty()) {
-      return res.status(422).json({ error: validationErrors.array()[0].msg });
+      const errorObj = {};
+      validationErrors.array().forEach((i) => (errorObj[i.path] = i.msg));
+      return res.status(422).json(errorObj);
     }
 
     // Search sender user
     const userSender = await userModel.findById(tokenIsValid.userId);
 
     if (!userSender) {
-      return res.status(404).json({ error: "Sender user not found" });
+      return res.status(404).json({ email: "Sender user not found." });
     }
 
     // Check if has enough balance
     if (userSender.balance < parsedAmount) {
-      return res.status(401).json({ error: "Not enough balance." });
+      return res.status(401).json({ amount: "Not enough balance." });
     }
 
     // Search receiver user
@@ -114,10 +118,10 @@ exports.postSend = async (req, res, next) => {
     if (!userReceiver) {
       return res
         .status(404)
-        .json({ error: "No user found", searchedEmail: email });
+        .json({ email: "No user found.", searchedEmail: email });
     }
     if (userReceiver.email === userSender.email) {
-      return res.status(401).json({ error: "Can not send to your self" });
+      return res.status(401).json({ email: "Can't send to your self." });
     }
 
     // Transaction
@@ -149,6 +153,6 @@ exports.postSend = async (req, res, next) => {
 
     return res.status(200).json({ transactionId: transaction });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    return res.status(500).json({ error: error.message });
   }
 };

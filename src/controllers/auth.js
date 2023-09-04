@@ -16,7 +16,9 @@ exports.postSignup = async (req, res, next) => {
 
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(422).json({ error: errors.array()[0].msg });
+    const errorObj = {};
+    errors.array().forEach((i) => (errorObj[i.path] = i.msg));
+    return res.status(422).json(errorObj);
   }
 
   try {
@@ -58,18 +60,22 @@ exports.postLogin = async (req, res, next) => {
 
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(422).json({ error: errors.array()[0].msg });
+    const errorObj = {};
+    errors.array().forEach((i) => (errorObj[i.path] = i.msg));
+    return res.status(422).json(errorObj);
   }
 
   try {
     const user = await User.findOne({ email: email });
     if (!user) {
-      return res.status(404).json({ error: "Email not registered." });
+      return res.status(404).json({ email: "Email not registered." });
     }
 
     const passwordsMatch = await bcrypt.compare(password, user.password);
     if (!passwordsMatch) {
-      return res.status(401).json({ error: "Invalid email and/or password" });
+      return res
+        .status(401)
+        .json({ password: "Invalid email and/or password" });
     }
 
     const token = jwt.sign({ userId: user._id, email }, process.env.TOKEN_KEY, {
