@@ -11,6 +11,10 @@ const User = require("../models/userModel.js");
 //Utils imports
 const { next500error } = require("../utils/next500error.js");
 
+exports.getWakeup = async (req, res, next) => {
+  return res.status(200).json({ message: "Server started" });
+};
+
 exports.postSignup = async (req, res, next) => {
   const { name, email, password, confirmPassword } = req.body;
 
